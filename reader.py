@@ -29,37 +29,43 @@ class Reader(threading.Thread):
 
 
 
-status = 0
+user_input = 0
 name_index = 0
 monitor = serial.Serial(port=os.environ["ARD_PORT"], baudrate=os.environ["ARD_BAUD"], timeout=.1)
 
 
-while status != "quit":
-    status = input("start/quit: ")
+while user_input != "quit":
+    user_input = input("'quit' or Spell name to record? ")
+    spell_name = user_input
 
-    if status == "start":
-        #read
-        monitor.flushInput()
-        monitor.flushOutput()
-        output = []
+    while user_input != "quit":
+        user_input = input("'quit', 'new' or 'Enter' to record: ")
 
-        recording = Reader(monitor)
-        recording.start() 
+        if user_input == "new":
+            break
+        elif user_input == "":
+            #read
+            monitor.flushInput()
+            monitor.flushOutput()
+            output = []
 
-        input("recording...\n'Enter' to end recording\n")
-        recording.should_run = False
-        recording.join()
+            recording = Reader(monitor)
+            recording.start() 
+
+            input("recording...\n'Enter' to end recording\n")
+            recording.should_run = False
+            recording.join()
 
 
-        #write
-        while os.path.exists("./" + str(name_index) + ".csv"):
-            name_index += 1
+            #write
+            while os.path.exists("./" + str(name_index) + ".csv"):
+                name_index += 1
 
-        f = open(str(name_index) + ".csv", "w")
-        f.write("accX;accY;accZ;gyroX;gyroY;gyroZ\n")
-        for line in recording.output:
-            f.write(str(line) + "\n")
-        f.close()
+            f = open(str(name_index) + ".csv", "w")
+            f.write("wizardName;spellName;accX;accY;accZ;gyroX;gyroY;gyroZ\n")
+            for line in recording.output:
+                f.write( "lol, im a wizard" + ";" + str(spell_name) + ";" + str(line) + "\n")
+            f.close()
 
 monitor.close()
 exit()
